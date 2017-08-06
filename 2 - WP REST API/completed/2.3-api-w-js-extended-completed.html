@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="profile" href="http://gmpg.org/xfn/11">
+    <title>JavaScript for WordPress</title>
+    <link rel="stylesheet" href="../../shared/style.css">
+</head>
+<body>
+
+<div id="page">
+
+    <header id="masthead" class="site-header" role="banner">
+
+        <div class="site-branding">
+            <p class="site-title">JavaScript for WordPress</a></p>
+            <p class="site-description">Just another JS and WP Site</p>
+        </div>
+
+    </header>
+
+    <div id="content" class="site-content">
+
+        <div id="primary" class="content-area">
+            <main id="main" class="site-main" role="main"></main>
+        </div>
+
+
+        <aside id="secondary" class="widget-area" role="complementary">
+            <div class="widget">
+                <h3>Welcome!</h3>
+                <p>This site is JavaScript powered.</p>  
+            </div>            
+
+        </aside>
+
+    </div><!-- #content -->
+
+    <footer id="colophon" class="site-footer" role="contentinfo">
+
+        <p>Proudly powered with JavaScript and WordPress.</p>
+
+    </footer>
+
+</div><!-- #page -->  
+
+<!--  Include the Axios AJAX Library  -->
+<script src="../../shared/axios.js" type="text/javascript"></script>
+<script type="text/javascript">
+
+    // Get the ul for the posts to display
+    // Set the URL for your WP API Root (ie https://www.example.dev/wp-json/)
+    const   container = document.getElementById( 'main' ),
+            wpRestUrl = 'https://www.example.dev/wp-json/';
+
+    (function init(){
+
+        // Call getPosts();
+        getPosts();
+    
+    })();
+
+    function getPosts() {
+
+        // Append 'wp/v2/posts/ to the wpRestURL
+        // Limit the number of posts to 3
+        axios({
+            method: 'get',
+            url: wpRestUrl + 'wp/v2/posts',
+            params: {
+                per_page: 3
+            }
+        })
+            .then( function( response ) {
+
+                // Clear the page
+                container.innerHTML = '';
+
+                // Loop through the posts (response.data)
+                for( post of response.data ) {
+                    // Pass the post to the createHeader function
+                    createHeader( post );
+                }
+
+                // Get the links inside of h2 tags
+                let links = document.querySelectorAll( '#main h2 a' );        
+                // Loop through the links 
+                for( link of links ) {
+                    // Call getPost when the link is clicked
+                    link.addEventListener( 'click', getPost );
+                }        
+
+            }); 
+
+    }
+
+    function createHeader( post ) {
+
+        // Create an h2 element
+        let h2 = document.createElement( 'h2' ),
+            markup = '';        
+
+        // Set the link as post.link
+        // Set the data-id as the post.id
+        // Add post.title.rendered inside the link
+        markup += `<a href="#${post.link}" data-id="${post.id}">`;
+        markup += post.title.rendered;
+        markup += '</a>';
+
+        // Set the innerHTML of the h2 to the markup
+        // Append the h2 to the main page container
+        h2.innerHTML = markup;
+        container.appendChild( h2 );  
+
+    }
+
+    function getPost( event ) {
+
+        // Ge the id from the link data-id
+        let id = event.target.dataset.id;
+
+        // Append the id to the url
+        axios({
+            method: 'get',
+            url: wpRestUrl + 'wp/v2/posts/' + id
+        })
+            .then( function( response ) {   
+
+                // Clear the page
+                container.innerHTML = '';              
+
+                // Pass response.data as a parameter to the showPost function
+                showPost( response.data );                
+            }); 
+
+    }        
+
+    function showPost( post ) {
+
+        // Create Wrapper
+        let article = document.createElement('article'),
+            markup = '';
+        
+        // Add class to article
+        article.classList.add( 'post' );
+        
+        // Create the markup for the page
+        // Set the title to post.title.rendered
+        // Set the content to post.content.rendered
+        markup += '<p><a class="back" href="#">Go Back</a></p>';
+        markup += `<h1>${post.title.rendered}</h1>`;
+        markup += `<div class="entry-content">${post.content.rendered}</div>`;                        
+
+        // Set the markup as the article innerHTML
+        article.innerHTML = markup;
+
+        // Attach an event listener to the back link
+        // Call getPosts when the link is clicked
+        article.querySelector( '.back' ).addEventListener( 'click', getPosts );
+
+        // Append the article to the page
+        container.appendChild( article );
+
+    }
+
+</script>
+
+
+</body>
+</html>

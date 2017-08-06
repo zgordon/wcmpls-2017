@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="profile" href="http://gmpg.org/xfn/11">
+    <title>JavaScript for WordPress</title>
+    <link rel="stylesheet" href="../../shared/style.css">
+</head>
+<body>
+
+<div id="page">
+
+    <header id="masthead" class="site-header" role="banner">
+
+        <div class="site-branding">
+            <p class="site-title">JavaScript for WordPress</a></p>
+            <p class="site-description">Just another JS and WP Site</p>
+        </div>
+
+    </header>
+
+    <div id="content" class="site-content">
+
+        <div id="primary" class="content-area">
+            <main id="main" class="site-main" role="main"></main>
+        </div>
+
+
+        <aside id="secondary" class="widget-area" role="complementary">
+            <div class="widget">
+                <h3>Welcome!</h3>
+                <p>This site is JavaScript powered.</p>  
+            </div>            
+
+        </aside>
+
+    </div><!-- #content -->
+
+    <footer id="colophon" class="site-footer" role="contentinfo">
+
+        <p>Proudly powered with JavaScript and WordPress.</p>
+
+    </footer>
+
+</div><!-- #page -->  
+
+<!--  Include the Axios AJAX Library  -->
+<script src="../../shared/axios.js" type="text/javascript"></script>
+<script type="text/javascript">
+
+    // Get the ul for the posts to display
+    // Set the URL for your WP API Root (ie https://www.example.dev/wp-json/)
+    const   container = document.getElementById( 'main' ),
+            wpRestUrl = 'https://www.example.dev/wp-json/';
+
+    (function init(){
+
+        // Call getPosts();
+        getPosts();
+    
+    })();
+
+    function getPosts() {
+
+        // Set the method to get
+        // Append 'wp/v2/posts' to wpRestUrl
+        // Get only 3 posts
+        axios({
+            method: 'get',
+            url: wpRestUrl + 'wp/v2/posts',
+            params: {
+                per_page: 3
+            }
+        })
+            .then( function( response ) {                
+
+                // Loop through the response.data
+                for( post of response.data ) {
+
+                    // Pass post to the
+                    createHeader( post );             
+
+                }
+
+            }); 
+
+    }
+
+    function createHeader( post ) {
+
+        // Create an h2 element node
+        let h2 = document.createElement( 'h2' ),
+            markup = '';
+
+        // Set the markup to a link with the post title inside
+        // Set the link to post.link
+        // Set the title to post.title.rendered
+        markup = `<a href="${post.link}">${post.title.rendered}</a>`;
+
+        // Set markup equal to the innerHTML of the h2
+        h2.innerHTML = markup;        
+
+        // Append the h2 to the container
+        container.appendChild( h2 );  
+
+    }
+
+</script>
+
+
+</body>
+</html>
